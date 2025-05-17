@@ -1,0 +1,7 @@
+[submodule "Vrc.OscQuery"]
+	path = Vrc.OscQuery
+	url = git@github.com:knah/Vrc.OscQuery.git
+	branch = main
+[submodule "NanoOsc"]
+	path = NanoOsc
+	url = git@github.com:knah/NanoOsc.git

@@ -1,0 +1,152 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oscinator="clr-namespace:Oscinator"
+        xmlns:converters="clr-namespace:Avalonia.Markup.Xaml.Converters;assembly=Avalonia.Markup.Xaml"
+        xmlns:viewModels="clr-namespace:Oscinator.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="450" d:DesignHeight="450"
+        Width="550" Height="800"
+        CanResize="False"
+        x:Class="Oscinator.MainWindow"
+        x:DataType="oscinator:MainWindow"
+        x:CompileBindings="True"
+        Title="Oscinator">
+  <Window.Resources>
+    <converters:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+    <oscinator:ResourceLookupConverter x:Key="ResourceLookupConverter"
+                                       InnerConverter="{StaticResource ColorToBrushConverter}" />
+  </Window.Resources>
+  <Grid>
+    <TabControl SelectedIndex="1">
+
+      <TabItem Header="General">
+        <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto">
+          <Label Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Bottom">Network interface:</Label>
+          <ComboBox Grid.Row="1" Grid.Column="0" Name="InterfaceSelector" ItemsSource="{Binding Interfaces}"
+                    SelectionChanged="InterfaceSelector_OnSelectionChanged">
+            <ComboBox.ItemTemplate>
+              <DataTemplate DataType="viewModels:InterfaceItemModel">
+                <Label Content="{Binding Name}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <HyperlinkButton Grid.Row="0" Grid.Column="2" NavigateUri="https://github.com/knah/Oscinator">GitHub Repo</HyperlinkButton>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Parameters" Name="ParametersTab">
+        <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" RowDefinitions="Auto,*">
+          <Button Grid.Row="0" Grid.Column="0" Click="RefreshButtonClick">Refresh</Button>
+          <CheckBox Grid.Row="0" Grid.Column="1" Name="ShowBuiltInParametersCheck"
+                    IsCheckedChanged="ShowBuiltInParametersCheck_OnIsCheckedChanged" Margin="8 0">
+            Show read-only parameters
+          </CheckBox>
+          <Panel Grid.Row="0" Grid.Column="2" />
+          <Label Grid.Row="0" Grid.Column="3" IsVisible="{Binding ViewModel.ShowRemoteAppSelector}">Remote application:</Label>
+          <ComboBox Grid.Row="0" Grid.Column="4" ItemsSource="{Binding RemoteApplications}"
+                    SelectionChanged="UpdateSelectedRemoteApplication"
+                    IsVisible="{Binding ViewModel.ShowRemoteAppSelector}" Name="RemoteAppSelector" />
+          <Label Grid.Row="0" Grid.Column="5" Name="RemoteAppProcessLabel" />
+          <DataGrid
+            Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6"
+            Name="AvatarParametersGrid"
+            ItemsSource="{Binding ViewModel.CurrentAvatarState.ParameterItems}"
+            IsReadOnly="True"
+            CanUserResizeColumns="True"
+            SelectionMode="Single"
+            AutoGenerateColumns="False"
+            CanUserSortColumns="True"
+            VerticalScrollBarVisibility="Visible">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Parameter" Binding="{Binding DisplayName}" CanUserSort="True" Width="*" />
+              <DataGridTemplateColumn Header="Value" Width="200" CanUserSort="False">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate DataType="viewModels:NamedAvatarParameter">
+                    <StackPanel>
+                      <CheckBox IsVisible="{Binding CheckboxVisible}"
+                                IsChecked="{Binding Value.BoolValueProp}"
+                                IsCheckedChanged="Item_CheckedChanged"
+                                Margin="10 0 " />
+                      <NumericUpDown IsVisible="{Binding IntControlVisible}"
+                                     Value="{Binding Value.IntValueProp}" Minimum="0"
+                                     Maximum="255"
+                                     FormatString="0"
+                                     ValueChanged="ItemInt_ValueChanged"
+                                     MaxWidth="200"
+                                     MinWidth="200"
+                                     HorizontalAlignment="Left" />
+                      <NumericUpDown IsVisible="{Binding FloatControlVisible}"
+                                     Value="{Binding Value.FloatValueProp}" Minimum="-2"
+                                     Maximum="2"
+                                     Increment="0.05"
+                                     FormatString="0.0000"
+                                     ValueChanged="ItemFloat_ValueChanged"
+                                     MaxWidth="200"
+                                     MinWidth="200"
+                                     HorizontalAlignment="Left" />
+                      <Label IsVisible="{Binding UnknownTextVisible}">
+                        unknown value/no value
+                      </Label>
+                      <Label IsVisible="{Binding ReadOnlyTextVisible}" Content="{Binding ReadOnlyText}" />
+                    </StackPanel>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn Header=" " Width="24" CanUserSort="False" CanUserResize="False">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Panel />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="OSCQuery">
+        <Grid>
+          <DataGrid IsReadOnly="True" ItemsSource="{Binding Services}" CanUserReorderColumns="True"
+                    CanUserResizeColumns="True">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+              <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+              <DataGridTextColumn Header="Address" Binding="{Binding Address}" />
+            </DataGrid.Columns>
+          </DataGrid>
+        </Grid>
+      </TabItem>
+
+      <TabItem Header="Log">
+        <Grid RowDefinitions="Auto,*">
+          <StackPanel Orientation="Horizontal">
+            <Button Click="LogClearClick">Clear</Button>
+            <Button Click="AddDebugLogEntries">Add debug entries</Button>
+          </StackPanel>
+          <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+            <ItemsControl ItemsSource="{Binding LogEntries}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <SelectableTextBlock FontFamily="Monospace" TextWrapping="Wrap">
+                    <Run Text="{Binding Severity}">
+                      <Run.Foreground>
+                        <Binding Path="SeverityColorName">
+                          <Binding.Converter>
+                            <StaticResource ResourceKey="ResourceLookupConverter" />
+                          </Binding.Converter>
+                        </Binding>
+                      </Run.Foreground>
+                    </Run>
+                    <Run Text="{Binding Time}" /> <Run Text="{Binding Category}" /> <Run Text="{Binding Message}" />
+                  </SelectableTextBlock>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </TabItem>
+
+    </TabControl>
+  </Grid>
+</Window>
