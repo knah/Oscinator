@@ -1,0 +1,97 @@
+name: .NET Core Desktop
+
+on:
+  push:
+    branches: [ "main" ]
+  create:
+    tags:
+      - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      
+      - name: Install .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Run dotnet publish linux
+        run: dotnet publish --sc -c Release -r linux-x64 Oscinator
+
+      - name: Create full zip linux
+        uses: TheDoctor0/zip-release@0.7.6
+        with:
+          type: 'tar'
+          filename: '../../../../../../Oscinator-full-linux-x64.tar.gz'
+          directory: 'Oscinator/bin/Release/net9.0/linux-x64/publish'
+
+      - name: Create release zip linux
+        uses: TheDoctor0/zip-release@0.7.6
+        with:
+          type: 'tar.gz'
+          filename: '../../../../../../Oscinator-linux-x64.tar.gz'
+          directory: 'Oscinator/bin/Release/net9.0/linux-x64/publish'
+          exclusions: '*.pdb *.dbg'
+        
+      - name: Run dotnet publish windows
+        run: dotnet publish --sc -c Release -r win-x64 Oscinator
+        
+      - name: Create full zip windows
+        uses: TheDoctor0/zip-release@0.7.6
+        with:
+          type: 'zip'
+          filename: '../../../../../../Oscinator-full-win-x64.zip'
+          directory: 'Oscinator/bin/Release/net9.0/win-x64/publish'
+
+      - name: Create release zip windows
+        uses: TheDoctor0/zip-release@0.7.6
+        with:
+          type: 'zip'
+          filename: '../../../../../../Oscinator-win-x64.zip'
+          directory: 'Oscinator/bin/Release/net9.0/win-x64/publish'
+          exclusions: '*.pdb *.dbg'
+      
+      - name: Upload build artifacts (linux full)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oscinator-full-linux-x64.tar.gz
+          if-no-files-found: 'error'
+          path: Oscinator-full-linux-x64.tar.gz
+            
+      - name: Upload build artifacts (linux)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oscinator-linux-x64.tar.gz
+          if-no-files-found: 'error'
+          path: Oscinator-linux-x64.tar.gz
+            
+      - name: Upload build artifacts (windows full)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oscinator-full-win-x64.zip
+          if-no-files-found: 'error'
+          path: Oscinator-full-win-x64.zip
+        
+      - name: Upload build artifacts (windows)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oscinator-win-x64.zip
+          if-no-files-found: 'error'
+          path: Oscinator-win-x64.zip
+
+        
+      - name: Publish a release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          body_path: ReleaseChangelog.md
+          files: |
+            Oscinator-win-x64.zip
+            Oscinator-linux-x64.tar.gz

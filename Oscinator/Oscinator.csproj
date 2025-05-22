@@ -6,9 +6,17 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <PublishAot>true</PublishAot>
         <PublishTrimmed>true</PublishTrimmed>
         <LangVersion>latest</LangVersion>
+        <AssemblyVersion>1.0.0</AssemblyVersion>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-Aot' or '$(Configuration)' == 'Release-Aot'">
+        <PublishAot>true</PublishAot>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug' or '$(Configuration)' == 'Release'">
+        <PublishSingleFile>true</PublishSingleFile>
     </PropertyGroup>
 
 
@@ -20,7 +28,7 @@
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.3.0" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.0" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug' or '$(Configuration)' == 'Debug-Aot'" Include="Avalonia.Diagnostics" Version="11.3.0" />
     </ItemGroup>
 
 
