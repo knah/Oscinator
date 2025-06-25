@@ -110,6 +110,9 @@ public partial class MainWindow : Window
         RemoteApplications.Clear();
         Services.Clear();
 
+        if (Design.IsDesignMode)
+            return;
+
         var bindAddress = ((InterfaceItemModel?)InterfaceSelector.SelectedItem)?.BindAddress;
         if (bindAddress == null) return;
         var listener = new OscinatorListener(bindAddress);
