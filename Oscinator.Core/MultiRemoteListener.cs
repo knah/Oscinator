@@ -155,7 +155,7 @@ public sealed class MultiRemoteListener : IDisposable
         return result;
     }
 
-    private static readonly IApplicationSupport[] KnownSupports = [new VrChatApplicationSupport()];
+    private static readonly IApplicationSupport[] KnownSupports = [new VrChatApplicationSupport(), new ChilloutVrApplicationSupport()];
     private static readonly ILogger<MultiRemoteListener> Logger = LogUtils.LoggerFor<MultiRemoteListener>();
 
     private static IApplicationSupport GetBestRemoteSupportByName(string serviceName)
