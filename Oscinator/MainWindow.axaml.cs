@@ -141,19 +141,17 @@ public partial class MainWindow : Window
             RemoteAppSelector.SelectedItem = lastSelectedService;
 
         ViewModel.ShowRemoteAppSelector = RemoteApplications.Count > 1;
-        if (ViewModel.CurrentAvatarState != null || RemoteApplications.Count <= 0) return;
+
+        if (RemoteApplications.Count <= 0 || RemoteApplications.Count != 1 && ViewModel.CurrentAvatarState != null) return;
         
-        var randomState = listener.AvatarStates.FirstOrDefault();
-        if (randomState != null)
-        {
-            ViewModel.CurrentAvatarState =
-                myStateViewModels.GetOrAdd(randomState, static s => new AvatarStateViewModel(s));
-            if (RemoteAppSelector.SelectedItem == null)
-                RemoteAppSelector.SelectedItem = RemoteApplications.FirstOrDefault();
-            UpdateRemoteProcessLabel(randomState.HostInfo.Name);
-        }
-
-
+        var singleState = listener.AvatarStates.FirstOrDefault();
+        if (singleState == null) return;
+        
+        ViewModel.CurrentAvatarState =
+            myStateViewModels.GetOrAdd(singleState, static s => new AvatarStateViewModel(s));
+        if (RemoteAppSelector.SelectedItem == null)
+            RemoteAppSelector.SelectedItem = RemoteApplications.FirstOrDefault();
+        UpdateRemoteProcessLabel(singleState.HostInfo.Name);
     }
 
     private void AddService(OscQueryServiceProfile profile)
