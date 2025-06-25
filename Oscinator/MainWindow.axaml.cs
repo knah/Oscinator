@@ -1,9 +1,7 @@
 using System;
 using System.Buffers;
-using System.Buffers.Binary;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -139,6 +137,7 @@ public partial class MainWindow : Window
         if (lastSelectedService != null && RemoteApplications.Contains(lastSelectedService)) 
             RemoteAppSelector.SelectedItem = lastSelectedService;
 
+        ViewModel.ShowRemoteAppSelector = RemoteApplications.Count > 1;
         if (ViewModel.CurrentAvatarState != null || RemoteApplications.Count <= 0) return;
         
         var randomState = listener.AvatarStates.FirstOrDefault();
@@ -146,6 +145,8 @@ public partial class MainWindow : Window
         {
             ViewModel.CurrentAvatarState =
                 myStateViewModels.GetOrAdd(randomState, static s => new AvatarStateViewModel(s));
+            if (RemoteAppSelector.SelectedItem == null)
+                RemoteAppSelector.SelectedItem = RemoteApplications.FirstOrDefault();
             UpdateRemoteProcessLabel(randomState.HostInfo.Name);
         }
 
@@ -295,12 +296,8 @@ public partial class MainWindow : Window
         LogEntries.Clear();
     }
 
-    private bool mySetSort;
-
     private void UpdateSort()
     {
-        if (mySetSort) return;
-        mySetSort = true;
         Dispatcher.UIThread.InvokeAsync(() => AvatarParametersGrid.Columns[0].Sort(ListSortDirection.Ascending));
     }
 
@@ -325,6 +322,7 @@ public partial class MainWindow : Window
         targetState?.FetchCurrentAvatarId();
         
         UpdateRemoteProcessLabel(selectedItem);
+        UpdateSort();
     }
 
     private void UpdateRemoteProcessLabel(string remoteName)

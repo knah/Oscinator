@@ -43,11 +43,10 @@
             Show read-only parameters
           </CheckBox>
           <Panel Grid.Row="0" Grid.Column="2" />
-          <Label Grid.Row="0" Grid.Column="3" IsVisible="{Binding ViewModel.ShowRemoteAppSelector}">Remote application:</Label>
           <ComboBox Grid.Row="0" Grid.Column="4" ItemsSource="{Binding RemoteApplications}"
                     SelectionChanged="UpdateSelectedRemoteApplication"
                     IsVisible="{Binding ViewModel.ShowRemoteAppSelector}" Name="RemoteAppSelector" />
-          <Label Grid.Row="0" Grid.Column="5" Name="RemoteAppProcessLabel" />
+          <Label Grid.Row="0" Grid.Column="5" Name="RemoteAppProcessLabel" IsVisible="{Binding ViewModel.ShowRemoteAppLabel}"/>
           <DataGrid
             Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6"
             Name="AvatarParametersGrid"

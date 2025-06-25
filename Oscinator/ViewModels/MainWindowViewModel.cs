@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+﻿using System.ComponentModel;
 
 namespace Oscinator.ViewModels;
 
@@ -31,9 +29,11 @@ public class MainWindowViewModel : INotifyPropertyChanged
             if (value == myShowRemoteAppSelector) return;
             myShowRemoteAppSelector = value;
             PropertyChanged?.Invoke(null, new PropertyChangedEventArgs(nameof(ShowRemoteAppSelector)));
+            PropertyChanged?.Invoke(null, new PropertyChangedEventArgs(nameof(ShowRemoteAppLabel)));
         }
     }
-
+    
+    public bool ShowRemoteAppLabel => !ShowRemoteAppSelector;
 
     public bool UseTreeViewForParameters
     {
