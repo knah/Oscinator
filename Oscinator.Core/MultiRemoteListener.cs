@@ -120,7 +120,7 @@ public sealed class MultiRemoteListener : IDisposable
             var remoteProcess = PortBasedProcessFinder.FindLocalProcess(point);
             if (remoteProcess != null)
                 foreach (var (key, value) in processes)
-                    if (value == remoteProcess)
+                    if (value.Id == remoteProcess.Id)
                         return key;
             
             foreach (var (key, value) in states)
