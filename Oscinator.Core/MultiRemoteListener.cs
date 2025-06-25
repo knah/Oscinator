@@ -158,7 +158,20 @@ public sealed class MultiRemoteListener : IDisposable
 
     private static IApplicationSupport GetBestRemoteSupportByName(string serviceName)
     {
-        return KnownSupports.MaxBy(it => it.MatchRemoteName(serviceName)) ?? DefaultApplicationSupport.Instance;
+        int? bestScore = null;
+        IApplicationSupport bestSupport = DefaultApplicationSupport.Instance;
+        foreach (var support in KnownSupports)
+        {
+            var score = support.MatchRemoteName(serviceName);
+            if (score == null) continue;
+            // C# quirk: n < null is always false
+            if (score <= bestScore) continue;
+            
+            bestScore = score;
+            bestSupport = support;
+        }
+
+        return bestSupport;
     }
 
     private void OnOscMessage(OscMessageParser parser, IPEndPoint source)
