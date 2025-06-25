@@ -1,3 +1,10 @@
+### 1.0.2 changes:
+* Added CVR ApplicationSupport class
+* Moved some activity to background threads to slightly reduce UI freezes
+* Avoid getting stuck on a wrong single process being selected when switching remote apps with downtime between them
+
+
+### 1.0.1 changes:
 UI improvements:
 * Parameter table sort is now case-insensitive
 * The vertical scrollbar on the parameter table is now always fully visible for ease of use in VR
