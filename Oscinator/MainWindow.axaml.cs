@@ -51,7 +51,7 @@ public partial class MainWindow : Window
                 return 1;
             
             if (xElem.IsReadOnly == yElem.IsReadOnly)
-                return string.Compare(xElem.Name, yElem.Name, StringComparison.Ordinal);
+                return string.Compare(xElem.Name, yElem.Name, StringComparison.OrdinalIgnoreCase);
             return xElem.IsReadOnly ? 1 : -1;
         }
     }
