@@ -41,9 +41,11 @@ public sealed class MultiRemoteListener : IDisposable
 
     private async Task InterrogateOscQueryService(OscQueryServiceProfile profile)
     {
+        // yield to background
+        await Task.Delay(0).ConfigureAwait(ConfigureAwaitOptions.ForceYielding);
         var serviceEndpoint = profile.EndPoint;
         
-        var hostInfo = await Utils.GetHostInfo(serviceEndpoint.Address, serviceEndpoint.Port, myCancellationTokenSource.Token);
+        var hostInfo = await Utils.GetHostInfo(serviceEndpoint.Address, serviceEndpoint.Port, myCancellationTokenSource.Token).ConfigureAwait(false);
         if (hostInfo == null)
         {
             Logger.LogInformation("Can't get OSC host info from service {Name} at {Endpoint}", profile.Name, serviceEndpoint);
@@ -60,7 +62,7 @@ public sealed class MultiRemoteListener : IDisposable
         var remoteSupport = GetBestRemoteSupportByName(hostInfo.Name);
         if (!remoteSupport.AvatarChangeNodeAppearsWithDelay)
         {
-            var tree = await Utils.GetOscTree(serviceEndpoint.Address, serviceEndpoint.Port, cancellationToken: myCancellationTokenSource.Token);
+            var tree = await Utils.GetOscTree(serviceEndpoint.Address, serviceEndpoint.Port, cancellationToken: myCancellationTokenSource.Token).ConfigureAwait(false);
             if (tree == null)
             {
                 Logger.LogInformation("Can't get OSC tree from service {Name} at {Endpoint}", hostInfo.Name,
