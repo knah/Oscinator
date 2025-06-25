@@ -22,7 +22,7 @@ public unsafe class LinuxPlatformPortDetector : IPlatformPortDetector
             foreach (var line in lines)
             {
                 var split = line.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-                if (split[1] != expectedAddressAny && split[1] != expectedAddressSpecific || !int.TryParse(split[3], out var state) || state != 7) continue;
+                if (split[1] != expectedAddressAny && split[1] != expectedAddressSpecific || !int.TryParse(split[3], out var state) || state != 7 && state != 1) continue;
                 candidateInodes.Add($"socket:[{split[9]}]");
             }
             
@@ -30,6 +30,8 @@ public unsafe class LinuxPlatformPortDetector : IPlatformPortDetector
                 return null;
             
             using var readLinkBuffer = MemoryPool<byte>.Shared.Rent(512);
+
+            var candidateProcesses = new HashSet<Process?>();
 
             foreach (var processDir in Directory.EnumerateDirectories("/proc"))
             {
@@ -49,8 +51,8 @@ public unsafe class LinuxPlatformPortDetector : IPlatformPortDetector
                             var returnedString = Encoding.UTF8.GetString(readLinkBuffer.Memory.Span[..(int)readLinkResult]);
 
                             if (!candidateInodes.Contains(returnedString)) continue;
-                            
-                            return Process.GetProcessById(pid);
+
+                            candidateProcesses.Add(Process.GetProcessById(pid));
                         }
                         catch (UnauthorizedAccessException)
                         {
@@ -62,6 +64,18 @@ public unsafe class LinuxPlatformPortDetector : IPlatformPortDetector
                     continue; // no-op; some processes may be inaccessible
                 }
             }
+
+            if (candidateProcesses.Count > 1)
+            {
+                // The socket is shared by both wineserver and applicaiton processes
+                // Prefer returning the nicely-named process instead of the generic one 
+                var maybeWineserver = candidateProcesses.FirstOrDefault(it =>
+                    it != null && it.ProcessName.EndsWith("wineserver", StringComparison.OrdinalIgnoreCase));
+                
+                if (maybeWineserver != null)
+                    candidateProcesses.Remove(maybeWineserver);
+            }
+            return candidateProcesses.FirstOrDefault(it => it != null);
         }
         catch (IOException)
         {
