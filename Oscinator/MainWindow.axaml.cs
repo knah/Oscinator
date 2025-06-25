@@ -10,8 +10,10 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
@@ -55,6 +57,9 @@ public partial class MainWindow : Window
             return xElem.IsReadOnly ? 1 : -1;
         }
     }
+
+    [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "get_VerticalScrollBar")]
+    private static extern ScrollBar GetScrollBar(DataGrid grid);
     
     public MainWindow()
     {
@@ -67,13 +72,13 @@ public partial class MainWindow : Window
 
         RefreshInterfaces();
 
-
-
         DispatcherTimer.RunOnce(() =>
         {
             UpdateSort();
             // Start as non-resizable to trick tiling WMs on Linux into floating us
             CanResize = true;
+            
+            GetScrollBar(AvatarParametersGrid).AllowAutoHide = false;
         }, TimeSpan.FromSeconds(1));
     }
 
